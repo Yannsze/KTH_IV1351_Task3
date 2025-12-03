@@ -10,11 +10,12 @@ public class courseLayoutDAO {
     private static final String STUDENT_COLUMN_NAME = "num_students";
 
     private Connection connection;
-    private PreparedStatement updateStudentCounts;
     private PreparedStatement getCourseCost;
+    private PreparedStatement updateStudentCounts;
     private PreparedStatement insertTeachingActivity;
     private PreparedStatement allocateTeacher;
     private PreparedStatement teacherLoadCount;
+    private PreparedStatement teacherAllocateActivity;
     private PreparedStatement deallocatedTeacher;
 
     // Construct new DAO objects connected to the database
@@ -45,6 +46,10 @@ public class courseLayoutDAO {
                         STUDENT_COLUMN_NAME + " = ? " +
                         "WHERE " + STUDENT_COURSE_INSTANCE_NAME + " = ?"
         );
+
+        teacherAllocateActivity = connection.prepareStatement(
+                "INSERT INTO "
+        );
     }
 
     public void updateStudentstmt(CourseInstanceDTO courseInstance) throws courseLayoutDBException {
@@ -66,6 +71,10 @@ public class courseLayoutDAO {
         }
     }
 
+    public void allocateTeacherActivity() {
+
+    }
+
     private void handleException(String failureMsg, Exception cause) throws courseLayoutDBException {
         String completeFailureMsg = failureMsg;
         try {
@@ -79,6 +88,15 @@ public class courseLayoutDAO {
             throw new courseLayoutDBException(failureMsg, cause);
         } else {
             throw new courseLayoutDBException(failureMsg);
+        }
+    }
+
+    // Throw exception if unable to commit
+    public void commit() throws courseLayoutDBException {
+        try {
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Failed to commit", e);
         }
     }
 }
