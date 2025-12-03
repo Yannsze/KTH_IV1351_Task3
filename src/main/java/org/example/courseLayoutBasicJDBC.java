@@ -3,6 +3,10 @@ package org.example;
 import javax.xml.transform.Result;
 import java.sql.*;
 
+
+/* TO BE DELETED */
+
+
 // TASKS
 // compute teaching cost
 // modify the course instance (insert, update)
