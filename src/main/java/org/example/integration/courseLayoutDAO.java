@@ -2,10 +2,13 @@ package org.example.integration;
 
 import org.example.model.AllocationDTO;
 import org.example.model.CourseInstanceDTO;
+import org.example.model.PlannedActivityDTO;
+import org.example.model.TeachingActivityDTO;
 
 import java.sql.*;
 
 public class courseLayoutDAO {
+    private static final String SALARY_HISTORY_TABLE = "salary_history";
     private static final String COURSE_INSTANCE_TABLE_NAME = "course_instance";
     private static final String COURSE_LAYOUT_NAME = "course_layout_id";
     private static final String COURSE_INSTANCE_ID_NAME = "instance_id";
@@ -18,6 +21,8 @@ public class courseLayoutDAO {
 
     private Connection connection;
     private PreparedStatement getCourseCost;
+    private PreparedStatement plannedTeachingCost;
+    private PreparedStatement actualTeachingCost;
     private PreparedStatement updateStudentCounts;
     private PreparedStatement insertNewTeachingActivity;
     private PreparedStatement teacherAllocateActivity;
@@ -46,6 +51,36 @@ public class courseLayoutDAO {
     }
 
     private void prepareStatements() throws SQLException {
+        plannedTeachingCost = connection.prepareStatement(
+                "WITH avg_salary AS (" +
+                        "    SELECT AVG(sh.salary_amount) AS avg_sal" +
+                        "    FROM " + SALARY_HISTORY_TABLE + "sh" +
+                        ")" +
+                        "SELECT SUM(avg_salary.avg_sal/ (pa.planned_hours * ta.factor) AS planned_cost" +
+                        "FROM " + EMPLOYEE_CROSS_REFERENCE_TABLE_NAME + " epa" +
+                        "JOIN " + TEACHING_TABLE_NAME + " ta ON epa.teaching_activity_id = ta.teaching_activity_id" +
+                        "JOIN " + COURSE_INSTANCE_TABLE_NAME + " ci ON epa.course_instance_id = ci.course_instance_id" +
+                        "JOIN avg_salary ON 1=1" +
+                        "WHERE ci.course_instance_id = ?" +
+                        "AND ci.study_year = ?;"
+        );
+
+        actualTeachingCost = connection.prepareStatement(
+                "SELECT SUM(sh.salary_amount/ (epa.actual_allocated_hours * ta.factor) AS actual_cost" +
+                        "FROM " + EMPLOYEE_CROSS_REFERENCE_TABLE_NAME+ " epa" +
+                        "JOIN " + TEACHING_TABLE_NAME + " ta ON epa.teaching_activity_id = ta.teaching_activity_id" +
+                        "JOIN " + COURSE_INSTANCE_TABLE_NAME + " ci ON epa.course_instance_id = ci.course_instance_id" +
+                        "JOIN " + SALARY_HISTORY_TABLE + " sh ON sh.employee_id = epa.employee_id" +
+                        "   AND sh.valid_from = (" +
+                        "       SELECT MAX(valid_from)" +
+                        "       FROM salary_history" +
+                        "       WHERE employee_id = epa.employee_id" +
+                        "       AND valid_from <= ci.start_date" +
+                        "   )" +
+                        "WHERE ci.course_instance_id = ?" +
+                        "AND ci.study_year = ?;"
+        );
+
         updateStudentCounts = connection.prepareStatement(
                 "UPDATE " + COURSE_INSTANCE_TABLE_NAME + " SET " +
                         COURSE_LAYOUT_NAME + " = ?, " +
@@ -70,6 +105,41 @@ public class courseLayoutDAO {
         insertNewTeachingActivity = connection.prepareStatement(
                 "INSERT INTO " + TEACHING_TABLE_NAME + " (activity_name) VALUES (?) RETURNING " +  PLANNED_ACTIVITY_ID_NAME
         );
+    }
+
+    public void plannedActualCoststmt(PlannedActivityDTO plannedActivity, TeachingActivityDTO teachingActivity) throws courseLayoutDBException {
+        String failureMsg = "Could not get planned and actual cost: " + plannedActivity + ", " + teachingActivity ;
+        try {
+            plannedTeachingCost.setInt(1, plannedActivity.getCourseInstanceId());
+            plannedTeachingCost.setString(2, plannedActivity.getStudyYear());
+            ResultSet rsPlanned = plannedTeachingCost.executeQuery(); // use executeQuery, not executeUpdate
+            double plannedCost = 0;
+            if (rsPlanned.next()) {
+                plannedCost = rsPlanned.getDouble("planned_cost");
+            } else {
+                handleException(failureMsg, null); // no rows returned
+            }
+            rsPlanned.close();
+            System.out.print("Planned cost: " + plannedCost);
+
+            actualTeachingCost.setInt(1, plannedActivity.getCourseInstanceId());
+            actualTeachingCost.setString(2, plannedActivity.getStudyYear());
+
+            ResultSet rsActual = actualTeachingCost.executeQuery();
+            double actualCost = 0;
+            if (rsActual.next()) {
+                actualCost = rsActual.getDouble("actual_cost");
+            } else {
+                handleException(failureMsg, null);
+            }
+            rsActual.close();
+
+            System.out.println(", Actual cost: " + actualCost);
+
+            connection.commit();
+        } catch (SQLException e) {
+            handleException(failureMsg, null);
+        }
     }
 
     public void updateStudentstmt(CourseInstanceDTO courseInstance) throws courseLayoutDBException {
@@ -133,15 +203,23 @@ public class courseLayoutDAO {
     }
 
     // Insert
-    public void insertNewTeachingActivitystmt() throws courseLayoutDBException {
+    public void insertNewTeachingActivitystmt(TeachingActivityDTO teachingActivity) throws courseLayoutDBException {
+        String failureMsg = "Could not insert teaching activity: " + teachingActivity;
+        try {
+            insertNewTeachingActivity.setString(1, teachingActivity.getActivityName());
 
+            int insertTeachingActivity = insertNewTeachingActivity.executeUpdate();
+            if (insertTeachingActivity != 1) {
+                handleException(failureMsg, null);
+            }
+
+            connection.commit();
+            System.out.println("New teaching activity inserted!");
+        }
+        catch (SQLException e) {
+            handleException(failureMsg, e);
+        }
     }
-
-
-
-
-
-
 
     // Exceptions handler
     private void handleException(String failureMsg, Exception cause) throws courseLayoutDBException {
