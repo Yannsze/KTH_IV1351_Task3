@@ -11,7 +11,7 @@ public class CourseLayoutService {
         this.courseLayoutDAO = courseLayoutDAO;
     }
 
-    public CostDTO calculateCostForCourse(PlannedActivityDTO plannedActivity, TeachingActivityDTO teachingActivity)
+    public CostImplementation calculateCostForCourse(PlannedActivityDTO plannedActivity, TeachingActivityDTO teachingActivity)
             throws courseLayoutDBException {
 
         return courseLayoutDAO.plannedActualCoststmt(plannedActivity, teachingActivity);

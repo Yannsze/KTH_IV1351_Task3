@@ -12,14 +12,10 @@ public class Controller {
         this.courseLayoutService = new CourseLayoutService(new courseLayoutDAO());
     }
 
-    public void showCost(PlannedActivityDTO plannedActivity, TeachingActivityDTO teachingActivity) {
-        try {
-            CostDTO cost = courseLayoutService.calculateCostForCourse(plannedActivity, teachingActivity);
-            System.out.println("Planned: " + cost.getPlannedCost());
-            System.out.println("Actual:  " + cost.getActualCost());
-        } catch(Exception e){
-            System.out.println("Error retrieving cost.");
-        }
+    public CostImplementation getCourseCost(int instanceId, String studyYear) throws courseLayoutDBException {
+        PlannedActivityDTO planned = new PlannedActivityImpl(instanceId, studyYear);
+        TeachingActivityDTO teaching = new TeachingActivityImpl("Lecture"); // example
+        return courseLayoutService.calculateCostForCourse(planned, teaching);
     }
 
     // Update students
