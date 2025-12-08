@@ -1,4 +1,4 @@
-package org.example.model;
+package org.example.DTO;
 
 public interface AllocationDTO {
     public String getEmployeeID();

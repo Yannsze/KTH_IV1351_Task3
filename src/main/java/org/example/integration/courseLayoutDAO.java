@@ -1,9 +1,10 @@
 package org.example.integration;
 
-import org.example.model.AllocationDTO;
-import org.example.model.CourseInstanceDTO;
-import org.example.model.PlannedActivityDTO;
-import org.example.model.TeachingActivityDTO;
+import org.example.DTO.AllocationDTO;
+import org.example.DTO.CourseInstanceDTO;
+import org.example.DTO.PlannedActivityDTO;
+import org.example.DTO.TeachingActivityDTO;
+import org.example.model.*;
 
 import java.sql.*;
 
@@ -17,7 +18,6 @@ public class courseLayoutDAO {
     private static final String EMPLOYEE_ID_NAME = "employee_id";
     private static final String PLANNED_ACTIVITY_ID_NAME = "activity_id";
     private static final String TEACHING_TABLE_NAME = "teaching_activity";
-
 
     private Connection connection;
     private PreparedStatement getCourseCost;
@@ -107,7 +107,7 @@ public class courseLayoutDAO {
         );
     }
 
-    public void plannedActualCoststmt(PlannedActivityDTO plannedActivity, TeachingActivityDTO teachingActivity) throws courseLayoutDBException {
+    public CostImplementation plannedActualCoststmt(PlannedActivityDTO plannedActivity, TeachingActivityDTO teachingActivity) throws courseLayoutDBException {
         String failureMsg = "Could not get planned and actual cost: " + plannedActivity + ", " + teachingActivity ;
         try {
             plannedTeachingCost.setInt(1, plannedActivity.getCourseInstanceId());
@@ -120,7 +120,6 @@ public class courseLayoutDAO {
                 handleException(failureMsg, null); // no rows returned
             }
             rsPlanned.close();
-            System.out.print("Planned cost: " + plannedCost);
 
             actualTeachingCost.setInt(1, plannedActivity.getCourseInstanceId());
             actualTeachingCost.setString(2, plannedActivity.getStudyYear());
@@ -134,11 +133,11 @@ public class courseLayoutDAO {
             }
             rsActual.close();
 
-            System.out.println(", Actual cost: " + actualCost);
-
             connection.commit();
+            return new CostImplementation(plannedCost, actualCost);
         } catch (SQLException e) {
             handleException(failureMsg, null);
+            return null; // required by Java
         }
     }
 
@@ -155,7 +154,7 @@ public class courseLayoutDAO {
             }
 
             connection.commit();
-            System.out.print("Student count updated!");
+
         } catch (SQLException sqle) {
             handleException(failureMsg, sqle);
         }
@@ -175,7 +174,7 @@ public class courseLayoutDAO {
             }
 
             connection.commit();
-            System.out.print("Teaching activity allocated!");
+
         } catch (SQLException sqle) {
             handleException(failureMsg, sqle);
         }
@@ -195,7 +194,6 @@ public class courseLayoutDAO {
             }
 
             connection.commit();
-            System.out.println("Teacher deallocated successfully!");
 
         } catch (SQLException e) {
             handleException(failureMsg, e);   // if >4 courses → trigger throws here
@@ -214,7 +212,6 @@ public class courseLayoutDAO {
             }
 
             connection.commit();
-            System.out.println("New teaching activity inserted!");
         }
         catch (SQLException e) {
             handleException(failureMsg, e);
