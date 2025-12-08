@@ -7,6 +7,4 @@ public interface CourseInstanceDTO {
     public String getCourseLayoutID();
 
     public String getCourseInstanceID();
-
-    public String getStudyPeriodID();
 }
