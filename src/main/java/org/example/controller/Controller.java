@@ -8,7 +8,7 @@ import org.example.model.*;
 public class Controller {
     private CourseLayoutService courseLayoutService;
 
-    public Controller(CourseLayoutService courseLayoutService) throws courseLayoutDBException {
+    public Controller() throws courseLayoutDBException {
         this.courseLayoutService = new CourseLayoutService(new courseLayoutDAO());
     }
 
