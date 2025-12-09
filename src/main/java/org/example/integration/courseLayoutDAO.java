@@ -68,6 +68,7 @@ public class courseLayoutDAO {
         actualTeachingCoststmt = connection.prepareStatement(
                 "SELECT SUM(sh.salary_amount / (epa.actual_allocated_hours * ta.factor)) AS actual_cost" +
                         " FROM " + EMPLOYEE_CROSS_REFERENCE_TABLE_NAME+ " epa" +
+                        " JOIN planned_activity pa ON epa.course_instance_id = pa.course_instance_id " +
                         " JOIN " + TEACHING_TABLE_NAME + " ta ON epa.teaching_activity_id = ta.teaching_activity_id" +
                         " JOIN " + COURSE_INSTANCE_TABLE_NAME + " ci ON epa.course_instance_id = ci.course_instance_id" +
                         " JOIN " + SALARY_HISTORY_TABLE + " sh ON sh.employee_id = epa.employee_id" +
