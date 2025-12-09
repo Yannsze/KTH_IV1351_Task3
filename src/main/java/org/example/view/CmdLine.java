@@ -1,5 +1,6 @@
 package org.example.view;
 
+import org.example.DTO.CostDTO;
 import org.example.controller.Controller;
 import org.example.integration.courseLayoutDBException;
 import org.example.model.Cost;
@@ -62,12 +63,12 @@ public class CmdLine {
             String studyYearStr = readString("Enter Study Year: ");
             int studyYear = Integer.parseInt(studyYearStr);
 
-            Cost cost = controller.getCourseCost(instanceId, studyYear);
+
+            CostDTO cost = controller.getCourseCost(instanceId, studyYear);
             System.out.println("Planned Cost: " + cost.getPlannedCost() + " | Actual Cost: " + cost.getActualCost());
         } catch (NumberFormatException e){
             System.out.println("Invalid input! Please enter an integer value.");
         }
-
     }
 
     private void handleModifyStudents() throws courseLayoutDBException {

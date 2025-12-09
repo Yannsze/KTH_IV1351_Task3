@@ -122,7 +122,6 @@ public class courseLayoutDAO {
                         "INSERT INTO employee_planned_activity(employee_id, course_instance_id, teaching_activity_id) " +
                         " SELECT ?, assigned_course.course_instance_id, assigned_course.teaching_activity_id " +
                         " FROM assigned_course;"
-
         );
     }
 

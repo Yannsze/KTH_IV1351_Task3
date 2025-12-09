@@ -1,5 +1,6 @@
 package org.example.controller;
 
+import org.example.DTO.CostDTO;
 import org.example.integration.courseLayoutDAO;
 import org.example.integration.courseLayoutDBException;
 
@@ -35,14 +36,16 @@ public class Controller {
      * Gets the planned and actual cost for a course.
      *
      * @param instanceId The course instance ID
-     * @param studyYear The study year
+     * @param studyYear  The study year
      * @return Cost object with planned and actual costs
      * @throws courseLayoutDBException if operation fails
      */
-    public Cost getCourseCost(int instanceId, int studyYear) throws courseLayoutDBException {
+    public CostDTO getCourseCost(int instanceId, int studyYear) throws courseLayoutDBException {
         PlannedActivity planned = new PlannedActivity(instanceId, studyYear);
         TeachingActivity teaching = new TeachingActivity("Lecture", 3.6); // Default activity type
-        return service.calculateCostForCourse(planned, teaching);
+
+        Cost cost = service.calculateCostForCourse(planned, teaching);
+        return new CostDTO(cost.getPlannedCost(), cost.getActualCost());
     }
 
     public void updateStudentCount(int courseLayoutID, int numStudents, String courseInstanceID)
