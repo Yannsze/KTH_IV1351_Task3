@@ -56,48 +56,65 @@ public class CmdLine {
     }
 
     private void handleComputeCost() throws courseLayoutDBException {
-        String instanceIdStr = readString("Enter Course Instance ID: ");
-        int instanceId = Integer.parseInt(instanceIdStr);
-        String studyYearStr = readString("Enter Study Year: ");
-        int studyYear = Integer.parseInt(studyYearStr);
+        try {
+            String instanceIdStr = readString("Enter Course Instance ID: ");
+            int instanceId = Integer.parseInt(instanceIdStr);
+            String studyYearStr = readString("Enter Study Year: ");
+            int studyYear = Integer.parseInt(studyYearStr);
 
-        Cost cost = controller.getCourseCost(instanceId, studyYear);
-        System.out.println("Planned Cost: " + cost.getPlannedCost() + " | Actual Cost: " + cost.getActualCost());
+            Cost cost = controller.getCourseCost(instanceId, studyYear);
+            System.out.println("Planned Cost: " + cost.getPlannedCost() + " | Actual Cost: " + cost.getActualCost());
+        } catch (NumberFormatException e){
+            System.out.println("Invalid input! Please enter an integer value.");
+        }
+
     }
 
     private void handleModifyStudents() throws courseLayoutDBException {
-        String courseLayoutIDstr = readString("Enter Course Layout ID: ");
-        int courseLayoutID = Integer.parseInt(courseLayoutIDstr);
-        String numStudentsStr = readString("Enter increased number of student in total: ");
-        int numStudents = Integer.parseInt(numStudentsStr);
-        String courseInstanceID = readString("Enter Course Instance ID: ");
+        try {
+            String courseLayoutIDstr = readString("Enter Course Layout ID: ");
+            int courseLayoutID = Integer.parseInt(courseLayoutIDstr);
+            String numStudentsStr = readString("Enter increased number of student in total: ");
+            int numStudents = Integer.parseInt(numStudentsStr);
+            String courseInstanceID = readString("Enter Course Instance ID: ");
 
-        controller.updateStudentCount(courseLayoutID, numStudents, courseInstanceID);
-        System.out.println("Student is now " + numStudents);
+            controller.updateStudentCount(courseLayoutID, numStudents, courseInstanceID);
+            System.out.println("Student is now " + numStudents);
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input! Please enter an integer value.");
+        }
     }
 
     private void handleAllocateTeacher() throws courseLayoutDBException {
-        String empIdStr = readString("Enter Teacher ID: ");
-        int empId = Integer.parseInt(empIdStr);
-        String courseInstanceIdStr = readString("Enter Course Instance ID: ");
-        int courseInstanceId = Integer.parseInt(courseInstanceIdStr);
-        String teachingActivityIdStr = readString("Enter Teaching Activity ID: ");
-        int teachingActivityId = Integer.parseInt(teachingActivityIdStr);
+        try {
+            String empIdStr = readString("Enter Teacher ID: ");
+            int empId = Integer.parseInt(empIdStr);
+            String courseInstanceIdStr = readString("Enter Course Instance ID: ");
+            int courseInstanceId = Integer.parseInt(courseInstanceIdStr);
+            String teachingActivityIdStr = readString("Enter Teaching Activity ID: ");
+            int teachingActivityId = Integer.parseInt(teachingActivityIdStr);
 
-        controller.allocateTeacher(empId, courseInstanceId, teachingActivityId);
-        System.out.println("Teacher allocated successfully.");
+            controller.allocateTeacher(empId, courseInstanceId, teachingActivityId);
+            System.out.println("Teacher allocated successfully.");
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input! Please enter an integer value.");
+        }
     }
 
     private void handleDeallocateTeacher() throws courseLayoutDBException {
-        String empIdStr = readString("Enter Teacher ID: ");
-        int empId = Integer.parseInt(empIdStr);
-        String courseInstanceIdStr = readString("Enter Course Instance ID: ");
-        int courseInstanceId = Integer.parseInt(courseInstanceIdStr);
-        String teachingActivityIdStr = readString("Enter Teaching Activity ID: ");
-        int teachingActivityId = Integer.parseInt(teachingActivityIdStr);
+        try {
+            String empIdStr = readString("Enter Teacher ID: ");
+            int empId = Integer.parseInt(empIdStr);
+            String courseInstanceIdStr = readString("Enter Course Instance ID: ");
+            int courseInstanceId = Integer.parseInt(courseInstanceIdStr);
+            String teachingActivityIdStr = readString("Enter Teaching Activity ID: ");
+            int teachingActivityId = Integer.parseInt(teachingActivityIdStr);
 
-        controller.deallocateTeacher(empId, courseInstanceId, teachingActivityId);
-        System.out.println("Teacher deallocated successfully.");
+            controller.deallocateTeacher(empId, courseInstanceId, teachingActivityId);
+            System.out.println("Teacher deallocated successfully.");
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input! Please enter an integer value.");
+        }
     }
 
     private void handleAddActivity() throws courseLayoutDBException {
