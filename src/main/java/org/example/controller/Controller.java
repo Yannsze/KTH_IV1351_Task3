@@ -41,7 +41,7 @@ public class Controller {
      */
     public Cost getCourseCost(int instanceId, int studyYear) throws courseLayoutDBException {
         PlannedActivity planned = new PlannedActivity(instanceId, studyYear);
-        TeachingActivity teaching = new TeachingActivity("Lecture"); // Default activity type
+        TeachingActivity teaching = new TeachingActivity("Lecture", 3.6); // Default activity type
         return service.calculateCostForCourse(planned, teaching);
     }
 
@@ -59,7 +59,7 @@ public class Controller {
      * @param activityId The activity ID
      * @throws courseLayoutDBException if operation fails
      */
-    public void allocateTeacher(String empId, String courseInstanceId, String activityId) 
+    public void allocateTeacher(int empId, int courseInstanceId, int activityId)
             throws courseLayoutDBException {
         Allocation allocation = new Allocation(empId, courseInstanceId, activityId);
         service.allocateTeacher(allocation);
@@ -70,23 +70,22 @@ public class Controller {
      *
      * @param empId The employee (teacher) ID
      * @param courseInstanceId The course instance ID
-     * @param activityId The activity ID
+     * @param teachingActivityId The activity ID
      * @throws courseLayoutDBException if operation fails
      */
-    public void deallocateTeacher(String empId, String courseInstanceId, String activityId) 
+    public void deallocateTeacher(int empId, int courseInstanceId, int teachingActivityId)
             throws courseLayoutDBException {
-        Allocation allocation = new Allocation(empId, courseInstanceId, activityId);
+        Allocation allocation = new Allocation(empId, courseInstanceId, teachingActivityId);
         service.deallocateTeacher(allocation);
     }
 
     /**
      * Creates a new teaching activity type.
      *
-     * @param name The name of the activity (e.g., "Exercise", "Lab")
      * @throws courseLayoutDBException if operation fails
      */
-    public void createTeachingActivity(String name) throws courseLayoutDBException {
-        TeachingActivity activity = new TeachingActivity(name);
+    public void createTeachingActivity(String name, double factor) throws courseLayoutDBException {
+        TeachingActivity activity = new TeachingActivity("Exercise", 1.0);
         service.createNewActivity(activity);
     }
 }

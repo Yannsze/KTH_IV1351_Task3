@@ -5,33 +5,33 @@ package org.example.model;
  * This is a domain model that encapsulates allocation data.
  */
 public class Allocation {
-    private final String employeeID;
-    private final String courseInstanceID;
-    private final String activityID;
+    private final int employeeID;
+    private final int courseInstanceID;
+    private final int teachingactivityID;
 
     /**
      * Creates a new allocation.
      *
      * @param employeeID The employee (teacher) ID
      * @param courseInstanceID The course instance ID
-     * @param activityID The activity ID
+     * @param teachingactivityID The activity ID
      */
-    public Allocation(String employeeID, String courseInstanceID, String activityID) {
+    public Allocation(int employeeID, int courseInstanceID, int teachingactivityID) {
         this.employeeID = employeeID;
         this.courseInstanceID = courseInstanceID;
-        this.activityID = activityID;
+        this.teachingactivityID = teachingactivityID;
     }
 
-    public String getEmployeeID() {
+    public int getEmployeeID() {
         return employeeID;
     }
 
-    public String getCourseInstanceID() {
+    public int getCourseInstanceID() {
         return courseInstanceID;
     }
 
-    public String getActivityID() {
-        return activityID;
+    public int getTeachingActivityID() {
+        return teachingactivityID;
     }
 
     @Override
@@ -39,7 +39,7 @@ public class Allocation {
         return "Allocation{" +
                 "employeeID='" + employeeID + '\'' +
                 ", courseInstanceID='" + courseInstanceID + '\'' +
-                ", activityID='" + activityID + '\'' +
+                ", activityID='" + teachingactivityID + '\'' +
                 '}';
     }
 }

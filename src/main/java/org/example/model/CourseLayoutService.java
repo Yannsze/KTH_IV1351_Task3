@@ -61,13 +61,13 @@ public class CourseLayoutService {
         if (allocation == null) {
             throw new IllegalArgumentException("Allocation cannot be null");
         }
-        if (allocation.getEmployeeID() == null || allocation.getEmployeeID().trim().isEmpty()) {
+        if (allocation.getEmployeeID() == 0) {
             throw new IllegalArgumentException("Employee ID cannot be empty");
         }
-        if (allocation.getCourseInstanceID() == null || allocation.getCourseInstanceID().trim().isEmpty()) {
+        if (allocation.getCourseInstanceID() == 0) {
             throw new IllegalArgumentException("Course instance ID cannot be empty");
         }
-        if (allocation.getActivityID() == null || allocation.getActivityID().trim().isEmpty()) {
+        if (allocation.getTeachingActivityID() == 0) {
             throw new IllegalArgumentException("Activity ID cannot be empty");
         }
         

@@ -79,27 +79,33 @@ public class CmdLine {
     }
 
     private void handleAllocateTeacher() throws courseLayoutDBException {
-        String empId = readString("Enter Teacher ID: ");
-        String courseInstanceId = readString("Enter Course Instance ID: ");
-        String activityId = readString("Enter Activity ID: ");
+        String empIdStr = readString("Enter Teacher ID: ");
+        int empId = Integer.parseInt(empIdStr);
+        String courseInstanceIdStr = readString("Enter Course Instance ID: ");
+        int courseInstanceId = Integer.parseInt(courseInstanceIdStr);
+        String teachingActivityIdStr = readString("Enter Teaching Activity ID: ");
+        int teachingActivityId = Integer.parseInt(teachingActivityIdStr);
 
-        controller.allocateTeacher(empId, courseInstanceId, activityId);
+        controller.allocateTeacher(empId, courseInstanceId, teachingActivityId);
         System.out.println("Teacher allocated successfully.");
     }
 
     private void handleDeallocateTeacher() throws courseLayoutDBException {
-        String empId = readString("Enter Teacher ID: ");
-        String courseInstanceId = readString("Enter Course Instance ID: ");
-        String activityId = readString("Enter Activity ID: ");
+        String empIdStr = readString("Enter Teacher ID: ");
+        int empId = Integer.parseInt(empIdStr);
+        String courseInstanceIdStr = readString("Enter Course Instance ID: ");
+        int courseInstanceId = Integer.parseInt(courseInstanceIdStr);
+        String teachingActivityIdStr = readString("Enter Teaching Activity ID: ");
+        int teachingActivityId = Integer.parseInt(teachingActivityIdStr);
 
-        controller.deallocateTeacher(empId, courseInstanceId, activityId);
+        controller.deallocateTeacher(empId, courseInstanceId, teachingActivityId);
         System.out.println("Teacher deallocated successfully.");
     }
 
     private void handleAddActivity() throws courseLayoutDBException {
         String name = "Exercise"; // fixed name for this assignment
-        controller.createTeachingActivity(name);
-        System.out.println("New 'Exercise' activity added successfully.");
+        controller.createTeachingActivity(name, 1.0);
+        System.out.println("New activity added successfully.");
     }
 
     // Helper methods to read input

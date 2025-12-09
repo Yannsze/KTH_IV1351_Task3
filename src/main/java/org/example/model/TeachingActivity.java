@@ -6,18 +6,24 @@ package org.example.model;
  */
 public class TeachingActivity {
     private final String activityName;
+    private double factor;
 
     /**
      * Creates a new teaching activity.
      *
      * @param activityName The name of the activity (e.g., "Lecture", "Exercise")
      */
-    public TeachingActivity(String activityName) {
+    public TeachingActivity(String activityName, double factor) {
         this.activityName = activityName;
+        this.factor = factor;
     }
 
     public String getActivityName() {
         return activityName;
+    }
+
+    public double getFactor() {
+        return factor;
     }
 
     @Override

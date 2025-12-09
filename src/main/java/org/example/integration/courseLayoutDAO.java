@@ -12,7 +12,7 @@ public class courseLayoutDAO {
     private static final String SALARY_HISTORY_TABLE = "salary_history";
     private static final String COURSE_INSTANCE_TABLE_NAME = "course_instance";
     private static final String COURSE_LAYOUT_NAME = "course_layout_id";
-    private static final String COURSE_INSTANCE_ID_NAME = "instance_id";
+    private static final String COURSE_INSTANCE_ID_NAME = "course_instance_id";
     private static final String STUDENT_COLUMN_NAME = "num_students";
     private static final String EMPLOYEE_CROSS_REFERENCE_TABLE_NAME = "employee_planned_activity";
     private static final String EMPLOYEE_ID_NAME = "employee_id";
@@ -100,7 +100,7 @@ public class courseLayoutDAO {
         teacherDeallocateActivitystmt = connection.prepareStatement(
                 // int, int, int
                 "DELETE FROM " + EMPLOYEE_CROSS_REFERENCE_TABLE_NAME +
-                        "WHERE " + EMPLOYEE_ID_NAME + " = ? AND " +
+                        " WHERE " + EMPLOYEE_ID_NAME + " = ? AND " +
                         COURSE_INSTANCE_ID_NAME + " = ? AND " +
                         TEACHING_TABLE_ID + " = ?;"
         );
@@ -168,9 +168,9 @@ public class courseLayoutDAO {
     public void allocateTeacherActivity(Allocation allocation) throws courseLayoutDBException {
         String failureMsg = "Could not allocate teaching activity: " + allocation;
         try {
-            teacherAllocateActivitystmt.setString(1, allocation.getEmployeeID());
-            teacherAllocateActivitystmt.setString(2, allocation.getCourseInstanceID());
-            teacherAllocateActivitystmt.setString(3, allocation.getActivityID());
+            teacherAllocateActivitystmt.setInt(1, allocation.getEmployeeID());
+            teacherAllocateActivitystmt.setInt(2, allocation.getCourseInstanceID());
+            teacherAllocateActivitystmt.setInt(3, allocation.getTeachingActivityID());
             int teacherActivityUpdate = teacherAllocateActivitystmt.executeUpdate();
 
             if (teacherActivityUpdate != 1) {
@@ -188,9 +188,9 @@ public class courseLayoutDAO {
     public void deallocatedTeacherActivity(Allocation allocation) throws courseLayoutDBException {
         String failureMsg = "Could not deallocated activity: " + allocation;
         try {
-            teacherDeallocateActivitystmt.setString(1, allocation.getEmployeeID());
-            teacherDeallocateActivitystmt.setString(2, allocation.getCourseInstanceID());
-            teacherDeallocateActivitystmt.setString(3, allocation.getActivityID());
+            teacherDeallocateActivitystmt.setInt(1, allocation.getEmployeeID());
+            teacherDeallocateActivitystmt.setInt(2, allocation.getCourseInstanceID());
+            teacherDeallocateActivitystmt.setInt(3, allocation.getTeachingActivityID());
 
             int teacherActivityUpdate = teacherDeallocateActivitystmt.executeUpdate();
             if (teacherActivityUpdate != 1) {
@@ -205,20 +205,26 @@ public class courseLayoutDAO {
     }
 
     // Insert
-    public void insertNewTeachingActivity(TeachingActivity teachingActivity) throws courseLayoutDBException {
+    public int insertNewTeachingActivity(TeachingActivity teachingActivity) throws courseLayoutDBException {
         String failureMsg = "Could not insert teaching activity: " + teachingActivity;
         try {
             insertNewTeachingActivitystmt.setString(1, teachingActivity.getActivityName());
+            insertNewTeachingActivitystmt.setDouble(2, teachingActivity.getFactor());
 
-            int insertTeachingActivity = insertNewTeachingActivitystmt.executeUpdate();
-            if (insertTeachingActivity != 1) {
-                handleException(failureMsg, null);
+            ResultSet rs = insertNewTeachingActivitystmt.executeQuery();
+
+            int id = 0;
+            if (rs.next()) {
+                id = rs.getInt(1);  // or column name "activity_id"
             }
+            rs.close();
 
             connection.commit();
+            return id;
         }
         catch (SQLException e) {
             handleException(failureMsg, e);
+            return -1;
         }
     }
 
