@@ -5,21 +5,21 @@ package org.example.model;
  * This is a domain model that encapsulates planned activity data.
  */
 public class PlannedActivity {
-    private final String courseInstanceId;
+    private final int courseInstanceId;
     private final String studyYear;
 
     /**
      * Creates a new planned activity.
      *
-     * @param courseInstanceId The course instance ID
+     * @param courseInstanceId The course instance ID (integer primary key)
      * @param studyYear The study year (e.g., "2024/2025")
      */
-    public PlannedActivity(String courseInstanceId, String studyYear) {
+    public PlannedActivity(int courseInstanceId, String studyYear) {
         this.courseInstanceId = courseInstanceId;
         this.studyYear = studyYear;
     }
 
-    public String getCourseInstanceId() {
+    public int getCourseInstanceId() {
         return courseInstanceId;
     }
 
@@ -30,7 +30,7 @@ public class PlannedActivity {
     @Override
     public String toString() {
         return "PlannedActivity{" +
-                "courseInstanceId='" + courseInstanceId + '\'' +
+                "courseInstanceId=" + courseInstanceId +
                 ", studyYear='" + studyYear + '\'' +
                 '}';
     }

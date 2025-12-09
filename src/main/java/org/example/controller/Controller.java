@@ -39,7 +39,7 @@ public class Controller {
      * @return Cost object with planned and actual costs
      * @throws courseLayoutDBException if operation fails
      */
-    public Cost getCourseCost(String instanceId, String studyYear) throws courseLayoutDBException {
+    public Cost getCourseCost(int instanceId, String studyYear) throws courseLayoutDBException {
         PlannedActivity planned = new PlannedActivity(instanceId, studyYear);
         TeachingActivity teaching = new TeachingActivity("Lecture"); // Default activity type
         return service.calculateCostForCourse(planned, teaching);

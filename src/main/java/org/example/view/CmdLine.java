@@ -57,7 +57,8 @@ public class CmdLine {
     }
 
     private void handleComputeCost() throws courseLayoutDBException {
-        String instanceId = readString("Enter Course Instance ID: ");
+        String instanceIdStr = readString("Enter Course Instance ID: ");
+        int instanceId = Integer.parseInt(instanceIdStr);
         String studyYear = readString("Enter Study Year: ");
 
         Cost cost = controller.getCourseCost(instanceId, studyYear);

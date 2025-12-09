@@ -16,8 +16,8 @@ public class courseLayoutDAO {
     private static final String STUDENT_COLUMN_NAME = "num_students";
     private static final String EMPLOYEE_CROSS_REFERENCE_TABLE_NAME = "employee_planned_activity";
     private static final String EMPLOYEE_ID_NAME = "employee_id";
-    private static final String PLANNED_ACTIVITY_ID_NAME = "activity_id";
     private static final String TEACHING_TABLE_NAME = "teaching_activity";
+    private static final String TEACHING_TABLE_ID = "teaching_activity_id";
 
     private Connection connection;
     private PreparedStatement plannedTeachingCoststmt;
@@ -49,6 +49,7 @@ public class courseLayoutDAO {
         connection.setAutoCommit(false);
     }
 
+    // course instance id is an int
     private void prepareStatements() throws SQLException {
         plannedTeachingCoststmt = connection.prepareStatement(
                 "WITH avg_salary AS (" +
@@ -57,7 +58,7 @@ public class courseLayoutDAO {
                         ")" +
                         " SELECT SUM(avg_salary.avg_sal / (pa.planned_hours * ta.factor)) AS planned_cost" +
                         " FROM " + EMPLOYEE_CROSS_REFERENCE_TABLE_NAME + " epa" +
-                        " JOIN planned_activity pa ON epa.course_instance_id = pa.course_instance_id " +
+                        " JOIN planned_activity pa ON epa.course_instance_id = CAST(pa.course_instance_id AS INTEGER) " +
                         " JOIN " + TEACHING_TABLE_NAME + " ta ON epa.teaching_activity_id = ta.teaching_activity_id" +
                         " JOIN " + COURSE_INSTANCE_TABLE_NAME + " ci ON epa.course_instance_id = ci.course_instance_id" +
                         " CROSS JOIN avg_salary" +
@@ -66,52 +67,54 @@ public class courseLayoutDAO {
         );
 
         actualTeachingCoststmt = connection.prepareStatement(
-                "SELECT SUM(sh.salary_amount / (epa.actual_allocated_hours * ta.factor)) AS actual_cost" +
-                        " FROM " + EMPLOYEE_CROSS_REFERENCE_TABLE_NAME+ " epa" +
-                        " JOIN planned_activity pa ON epa.course_instance_id = pa.course_instance_id " +
+                "WITH avg_salary AS (" +
+                        "    SELECT AVG(sh.salary_amount) AS avg_sal" +
+                        "    FROM " + SALARY_HISTORY_TABLE + " sh" +
+                        ")" +
+                        " SELECT SUM(avg_salary.avg_sal / (epa.actual_allocated_hours * ta.factor)) AS actual_cost" +
+                        " FROM " + EMPLOYEE_CROSS_REFERENCE_TABLE_NAME + " epa" +
+                        " JOIN planned_activity pa ON epa.course_instance_id = CAST(pa.course_instance_id AS INTEGER) " +
                         " JOIN " + TEACHING_TABLE_NAME + " ta ON epa.teaching_activity_id = ta.teaching_activity_id" +
                         " JOIN " + COURSE_INSTANCE_TABLE_NAME + " ci ON epa.course_instance_id = ci.course_instance_id" +
-                        " JOIN " + SALARY_HISTORY_TABLE + " sh ON sh.employee_id = epa.employee_id" +
-                        "   AND sh.valid_from = (" +
-                        "       SELECT MAX(valid_from)" +
-                        "       FROM salary_history" +
-                        "       WHERE employee_id = epa.employee_id" +
-                        "       AND valid_from <= ci.start_date" +
-                        "   )" +
+                        " CROSS JOIN avg_salary" +
                         " WHERE ci.course_instance_id = ?" +
                         " AND ci.study_year = ?;"
         );
 
         updateStudentCountsstmt = connection.prepareStatement(
+                // int, int, varchar
                 "UPDATE " + COURSE_INSTANCE_TABLE_NAME + " SET " +
                         COURSE_LAYOUT_NAME + " = ?, " +
                         STUDENT_COLUMN_NAME + " = ? " +
-                        "WHERE " + COURSE_INSTANCE_ID_NAME + " = ?"
+                        "WHERE " + COURSE_INSTANCE_ID_NAME + " = ?;"
         );
 
         teacherAllocateActivitystmt = connection.prepareStatement(
+                // int, int, int
                 "INSERT INTO " + EMPLOYEE_CROSS_REFERENCE_TABLE_NAME + " (" +
                         EMPLOYEE_ID_NAME + ", " + COURSE_INSTANCE_ID_NAME + ", " +
-                        PLANNED_ACTIVITY_ID_NAME + ") " +
-                        "VALUES (?, ?, ?)"
+                        TEACHING_TABLE_ID + ") " +
+                        "VALUES (?, ?, ?);"
         );
 
         teacherDeallocateActivitystmt = connection.prepareStatement(
+                // int, int, int
                 "DELETE FROM " + EMPLOYEE_CROSS_REFERENCE_TABLE_NAME +
                         "WHERE " + EMPLOYEE_ID_NAME + " = ? AND " +
                         COURSE_INSTANCE_ID_NAME + " = ? AND " +
-                        PLANNED_ACTIVITY_ID_NAME + " = ?"
+                        TEACHING_TABLE_ID + " = ?;"
         );
 
         insertNewTeachingActivitystmt = connection.prepareStatement(
-                "INSERT INTO " + TEACHING_TABLE_NAME + " (activity_name) VALUES (?) RETURNING " +  PLANNED_ACTIVITY_ID_NAME
+                // string, double
+                "INSERT INTO " + TEACHING_TABLE_NAME + " (activity_name, factor) VALUES (?, ?) RETURNING " +  TEACHING_TABLE_ID
         );
     }
 
     public Cost plannedActualCosts(PlannedActivity plannedActivity, TeachingActivity teachingActivity) throws courseLayoutDBException {
         String failureMsg = "Could not get planned and actual cost: " + plannedActivity + ", " + teachingActivity ;
         try {
-            plannedTeachingCoststmt.setString(1, plannedActivity.getCourseInstanceId());
+            plannedTeachingCoststmt.setInt(1, plannedActivity.getCourseInstanceId());
             plannedTeachingCoststmt.setString(2, plannedActivity.getStudyYear());
             ResultSet rsPlanned = plannedTeachingCoststmt.executeQuery(); // use executeQuery, not executeUpdate
             double plannedCost = 0;
@@ -122,7 +125,7 @@ public class courseLayoutDAO {
             }
             rsPlanned.close();
 
-            actualTeachingCoststmt.setString(1, plannedActivity.getCourseInstanceId());
+            actualTeachingCoststmt.setInt(1, plannedActivity.getCourseInstanceId());
             actualTeachingCoststmt.setString(2, plannedActivity.getStudyYear());
 
             ResultSet rsActual = actualTeachingCoststmt.executeQuery();

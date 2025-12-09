@@ -1,7 +1,6 @@
 package org.example.startUp;
 
 import org.example.controller.Controller;
-import org.example.integration.courseLayoutDBException;
 import org.example.view.CmdLine;
 
 public class Main {
