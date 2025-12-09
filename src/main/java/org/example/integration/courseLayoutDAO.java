@@ -106,8 +106,23 @@ public class courseLayoutDAO {
         );
 
         insertNewTeachingActivitystmt = connection.prepareStatement(
-                // string, double
-                "INSERT INTO " + TEACHING_TABLE_NAME + " (activity_name, factor) VALUES (?, ?) RETURNING " +  TEACHING_TABLE_ID
+                // string, double, int, int
+                //"INSERT INTO " + TEACHING_TABLE_NAME + " (activity_name, factor) VALUES (?, ?) RETURNING " +  TEACHING_TABLE_ID
+                "WITH new_activity AS (" +
+                        " INSERT INTO " + TEACHING_TABLE_NAME + " (activity_name, factor) " +
+                        " VALUES (?, ?) " +
+                        " RETURNING " + TEACHING_TABLE_ID + "), " +
+                        "assigned_course AS (" +
+                        " INSERT INTO planned_activity(teaching_activity_id, course_instance_id, planned_hours) " +
+                        " SELECT new_activity." + TEACHING_TABLE_ID + ", ci.course_instance_id, ? " +
+                        " FROM new_activity CROSS JOIN course_instance ci " +
+                        " LIMIT 1 " +
+                        " RETURNING teaching_activity_id, course_instance_id" +
+                        ") " +
+                        "INSERT INTO employee_planned_activity(employee_id, course_instance_id, teaching_activity_id) " +
+                        " SELECT ?, assigned_course.course_instance_id, assigned_course.teaching_activity_id " +
+                        " FROM assigned_course;"
+
         );
     }
 
@@ -205,26 +220,23 @@ public class courseLayoutDAO {
     }
 
     // Insert
-    public int insertNewTeachingActivity(TeachingActivity teachingActivity) throws courseLayoutDBException {
+    public void insertNewTeachingActivity(TeachingActivity teachingActivity) throws courseLayoutDBException {
         String failureMsg = "Could not insert teaching activity: " + teachingActivity;
         try {
             insertNewTeachingActivitystmt.setString(1, teachingActivity.getActivityName());
             insertNewTeachingActivitystmt.setDouble(2, teachingActivity.getFactor());
+            insertNewTeachingActivitystmt.setInt(3, 10);
+            insertNewTeachingActivitystmt.setInt(4, 1);
 
-            ResultSet rs = insertNewTeachingActivitystmt.executeQuery();
-
-            int id = 0;
-            if (rs.next()) {
-                id = rs.getInt(1);  // or column name "activity_id"
+            int insertNewTA = insertNewTeachingActivitystmt.executeUpdate();
+            if (insertNewTA != 1) {
+                handleException(failureMsg, null);
             }
-            rs.close();
 
             connection.commit();
-            return id;
         }
         catch (SQLException e) {
             handleException(failureMsg, e);
-            return -1;
         }
     }
 
