@@ -18,6 +18,7 @@ public class courseLayoutDAO {
     private static final String EMPLOYEE_ID_NAME = "employee_id";
     private static final String TEACHING_TABLE_NAME = "teaching_activity";
     private static final String TEACHING_TABLE_ID = "teaching_activity_id";
+    private static final String AVG_SALARY = "avg_salary";
 
     private Connection connection;
     private PreparedStatement plannedTeachingCoststmt;
@@ -52,31 +53,31 @@ public class courseLayoutDAO {
     // course instance id is an int
     private void prepareStatements() throws SQLException {
         plannedTeachingCoststmt = connection.prepareStatement(
-                "WITH avg_salary AS (" +
+                "WITH " + AVG_SALARY + " AS (" +
                         "    SELECT AVG(sh.salary_amount) AS avg_sal" +
                         "    FROM " + SALARY_HISTORY_TABLE + " sh" +
                         ")" +
-                        " SELECT SUM(avg_salary.avg_sal / (pa.planned_hours * ta.factor)) AS planned_cost" +
+                        " SELECT ROUND(CAST(SUM(avg_salary.avg_sal / (pa.planned_hours * ta.factor)) AS NUMERIC), 2)AS planned_cost" +
                         " FROM " + EMPLOYEE_CROSS_REFERENCE_TABLE_NAME + " epa" +
                         " JOIN planned_activity pa ON epa.course_instance_id = CAST(pa.course_instance_id AS INTEGER) " +
                         " JOIN " + TEACHING_TABLE_NAME + " ta ON epa.teaching_activity_id = ta.teaching_activity_id" +
                         " JOIN " + COURSE_INSTANCE_TABLE_NAME + " ci ON epa.course_instance_id = ci.course_instance_id" +
-                        " CROSS JOIN avg_salary" +
+                        " CROSS JOIN " + AVG_SALARY +
                         " WHERE ci.course_instance_id = ?" +
                         " AND ci.study_year = ?;"
         );
 
         actualTeachingCoststmt = connection.prepareStatement(
-                "WITH avg_salary AS (" +
+                "WITH " + AVG_SALARY + " AS (" +
                         "    SELECT AVG(sh.salary_amount) AS avg_sal" +
                         "    FROM " + SALARY_HISTORY_TABLE + " sh" +
                         ")" +
-                        " SELECT SUM(avg_salary.avg_sal / (epa.actual_allocated_hours * ta.factor)) AS actual_cost" +
+                        " SELECT ROUND(CAST(SUM(avg_salary.avg_sal / (epa.actual_allocated_hours * ta.factor)) AS NUMERIC), 2)AS actual_cost" +
                         " FROM " + EMPLOYEE_CROSS_REFERENCE_TABLE_NAME + " epa" +
                         " JOIN planned_activity pa ON epa.course_instance_id = CAST(pa.course_instance_id AS INTEGER) " +
                         " JOIN " + TEACHING_TABLE_NAME + " ta ON epa.teaching_activity_id = ta.teaching_activity_id" +
                         " JOIN " + COURSE_INSTANCE_TABLE_NAME + " ci ON epa.course_instance_id = ci.course_instance_id" +
-                        " CROSS JOIN avg_salary" +
+                        " CROSS JOIN " + AVG_SALARY +
                         " WHERE ci.course_instance_id = ?" +
                         " AND ci.study_year = ?;"
         );
@@ -113,13 +114,13 @@ public class courseLayoutDAO {
                         " VALUES (?, ?) " +
                         " RETURNING " + TEACHING_TABLE_ID + "), " +
                         "assigned_course AS (" +
-                        " INSERT INTO planned_activity(teaching_activity_id, course_instance_id, planned_hours) " +
+                        " INSERT INTO planned_activity(" + TEACHING_TABLE_ID +", " + COURSE_INSTANCE_ID_NAME + ", planned_hours) " +
                         " SELECT new_activity." + TEACHING_TABLE_ID + ", ci.course_instance_id, ? " +
                         " FROM new_activity CROSS JOIN course_instance ci " +
                         " LIMIT 1 " +
-                        " RETURNING teaching_activity_id, course_instance_id" +
+                        " RETURNING " + TEACHING_TABLE_ID + ", course_instance_id" +
                         ") " +
-                        "INSERT INTO employee_planned_activity(employee_id, course_instance_id, teaching_activity_id) " +
+                        "INSERT INTO employee_planned_activity(employee_id, " + COURSE_INSTANCE_ID_NAME + ", "+ TEACHING_TABLE_ID +") " +
                         " SELECT ?, assigned_course.course_instance_id, assigned_course.teaching_activity_id " +
                         " FROM assigned_course;"
         );

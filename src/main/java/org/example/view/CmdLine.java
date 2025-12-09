@@ -119,9 +119,14 @@ public class CmdLine {
     }
 
     private void handleAddActivity() throws courseLayoutDBException {
-        String name = "Exercise"; // fixed name for this assignment
-        controller.createTeachingActivity(name, 1.0);
-        System.out.println("New activity added successfully.");
+        try {
+            String name = "Exercise"; // fixed name for this assignment
+            controller.createTeachingActivity(name, 1.0);
+            System.out.println("New activity added successfully.");
+        } catch (courseLayoutDBException e) {
+            System.out.print("The Activity has already added!");
+        }
+
     }
 
     // Helper methods to read input
