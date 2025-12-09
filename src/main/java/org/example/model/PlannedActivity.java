@@ -6,7 +6,7 @@ package org.example.model;
  */
 public class PlannedActivity {
     private final int courseInstanceId;
-    private final String studyYear;
+    private final int studyYear;
 
     /**
      * Creates a new planned activity.
@@ -14,7 +14,7 @@ public class PlannedActivity {
      * @param courseInstanceId The course instance ID (integer primary key)
      * @param studyYear The study year (e.g., "2024/2025")
      */
-    public PlannedActivity(int courseInstanceId, String studyYear) {
+    public PlannedActivity(int courseInstanceId, int studyYear) {
         this.courseInstanceId = courseInstanceId;
         this.studyYear = studyYear;
     }
@@ -23,7 +23,7 @@ public class PlannedActivity {
         return courseInstanceId;
     }
 
-    public String getStudyYear() {
+    public int getStudyYear() {
         return studyYear;
     }
 

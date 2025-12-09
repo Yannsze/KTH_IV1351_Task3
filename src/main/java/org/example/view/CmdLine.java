@@ -3,6 +3,7 @@ package org.example.view;
 import org.example.controller.Controller;
 import org.example.integration.courseLayoutDBException;
 import org.example.model.Cost;
+import org.example.model.CourseInstance;
 
 import java.util.Scanner;
 
@@ -59,19 +60,22 @@ public class CmdLine {
     private void handleComputeCost() throws courseLayoutDBException {
         String instanceIdStr = readString("Enter Course Instance ID: ");
         int instanceId = Integer.parseInt(instanceIdStr);
-        String studyYear = readString("Enter Study Year: ");
+        String studyYearStr = readString("Enter Study Year: ");
+        int studyYear = Integer.parseInt(studyYearStr);
 
         Cost cost = controller.getCourseCost(instanceId, studyYear);
         System.out.println("Planned Cost: " + cost.getPlannedCost() + " | Actual Cost: " + cost.getActualCost());
     }
 
     private void handleModifyStudents() throws courseLayoutDBException {
-        String instanceId = readString("Enter Course Instance ID: ");
-        String layoutId = readString("Enter Course Layout ID: ");
-        int increment = 100;
+        String courseLayoutIDstr = readString("Enter Course Layout ID: ");
+        int courseLayoutID = Integer.parseInt(courseLayoutIDstr);
+        String numStudentsStr = readString("Enter increased number of student in total: ");
+        int numStudents = Integer.parseInt(numStudentsStr);
+        String courseInstanceID = readString("Enter Course Instance ID: ");
 
-        controller.updateStudentCount(instanceId, layoutId, increment);
-        System.out.println("Student count increased by " + increment);
+        controller.updateStudentCount(courseLayoutID, numStudents, courseInstanceID);
+        System.out.println("Student is now " + numStudents);
     }
 
     private void handleAllocateTeacher() throws courseLayoutDBException {

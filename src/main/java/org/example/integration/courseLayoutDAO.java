@@ -82,7 +82,7 @@ public class courseLayoutDAO {
         );
 
         updateStudentCountsstmt = connection.prepareStatement(
-                // int, int, varchar
+                // int, int, varchar (string)
                 "UPDATE " + COURSE_INSTANCE_TABLE_NAME + " SET " +
                         COURSE_LAYOUT_NAME + " = ?, " +
                         STUDENT_COLUMN_NAME + " = ? " +
@@ -115,7 +115,7 @@ public class courseLayoutDAO {
         String failureMsg = "Could not get planned and actual cost: " + plannedActivity + ", " + teachingActivity ;
         try {
             plannedTeachingCoststmt.setInt(1, plannedActivity.getCourseInstanceId());
-            plannedTeachingCoststmt.setString(2, plannedActivity.getStudyYear());
+            plannedTeachingCoststmt.setInt(2, plannedActivity.getStudyYear());
             ResultSet rsPlanned = plannedTeachingCoststmt.executeQuery(); // use executeQuery, not executeUpdate
             double plannedCost = 0;
             if (rsPlanned.next()) {
@@ -126,7 +126,7 @@ public class courseLayoutDAO {
             rsPlanned.close();
 
             actualTeachingCoststmt.setInt(1, plannedActivity.getCourseInstanceId());
-            actualTeachingCoststmt.setString(2, plannedActivity.getStudyYear());
+            actualTeachingCoststmt.setInt(2, plannedActivity.getStudyYear());
 
             ResultSet rsActual = actualTeachingCoststmt.executeQuery();
             double actualCost = 0;
@@ -148,7 +148,7 @@ public class courseLayoutDAO {
     public void updateStudent(CourseInstance courseInstance) throws courseLayoutDBException {
         String failureMsg = "Could not update the course instance: " + courseInstance;
         try {
-            updateStudentCountsstmt.setString(1, courseInstance.getCourseLayoutID());
+            updateStudentCountsstmt.setInt(1, courseInstance.getCourseLayoutID());
             updateStudentCountsstmt.setInt(2, courseInstance.getNumStudents());
             updateStudentCountsstmt.setString(3, courseInstance.getCourseInstanceID());
             int numStudentsUpdate = updateStudentCountsstmt.executeUpdate();

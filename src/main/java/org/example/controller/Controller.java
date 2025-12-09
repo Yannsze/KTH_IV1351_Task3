@@ -39,23 +39,15 @@ public class Controller {
      * @return Cost object with planned and actual costs
      * @throws courseLayoutDBException if operation fails
      */
-    public Cost getCourseCost(int instanceId, String studyYear) throws courseLayoutDBException {
+    public Cost getCourseCost(int instanceId, int studyYear) throws courseLayoutDBException {
         PlannedActivity planned = new PlannedActivity(instanceId, studyYear);
         TeachingActivity teaching = new TeachingActivity("Lecture"); // Default activity type
         return service.calculateCostForCourse(planned, teaching);
     }
 
-    /**
-     * Updates the student count for a course instance.
-     *
-     * @param instanceId The course instance ID
-     * @param layoutId The course layout ID
-     * @param numStudents The new number of students
-     * @throws courseLayoutDBException if operation fails
-     */
-    public void updateStudentCount(String instanceId, String layoutId, int numStudents) 
+    public void updateStudentCount(int courseLayoutID, int numStudents, String courseInstanceID)
             throws courseLayoutDBException {
-        CourseInstance instance = new CourseInstance(instanceId, layoutId, numStudents);
+        CourseInstance instance = new CourseInstance(courseLayoutID, numStudents, courseInstanceID);
         service.updateStudentCount(instance);
     }
 

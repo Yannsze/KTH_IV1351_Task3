@@ -6,7 +6,7 @@ package org.example.model;
  */
 public class CourseInstance {
     private final String courseInstanceID;
-    private final String courseLayoutID;
+    private final int courseLayoutID;
     private final int numStudents;
 
     /**
@@ -16,7 +16,7 @@ public class CourseInstance {
      * @param courseLayoutID The course layout ID (foreign key)
      * @param numStudents The number of students enrolled
      */
-    public CourseInstance(String courseInstanceID, String courseLayoutID, int numStudents) {
+    public CourseInstance(int courseLayoutID, int numStudents, String courseInstanceID) {
         this.courseInstanceID = courseInstanceID;
         this.courseLayoutID = courseLayoutID;
         this.numStudents = numStudents;
@@ -26,7 +26,7 @@ public class CourseInstance {
         return courseInstanceID;
     }
 
-    public String getCourseLayoutID() {
+    public int getCourseLayoutID() {
         return courseLayoutID;
     }
 
