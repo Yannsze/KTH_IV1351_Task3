@@ -3,8 +3,6 @@ package org.example.view;
 import org.example.controller.Controller;
 import org.example.integration.courseLayoutDBException;
 import org.example.model.Cost;
-import org.example.model.CourseInstance;
-
 import java.util.Scanner;
 
 public class CmdLine {
