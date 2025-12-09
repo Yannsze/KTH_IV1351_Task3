@@ -2,7 +2,7 @@ package org.example.view;
 
 import org.example.controller.Controller;
 import org.example.integration.courseLayoutDBException;
-import org.example.model.CostImplementation;
+import org.example.model.Cost;
 
 import java.util.Scanner;
 
@@ -60,7 +60,7 @@ public class CmdLine {
         String instanceId = readString("Enter Course Instance ID: ");
         String studyYear = readString("Enter Study Year: ");
 
-        CostImplementation cost = controller.getCourseCost(Integer.parseInt(instanceId), studyYear);
+        Cost cost = controller.getCourseCost(instanceId, studyYear);
         System.out.println("Planned Cost: " + cost.getPlannedCost() + " | Actual Cost: " + cost.getActualCost());
     }
 

@@ -1,44 +1,100 @@
 package org.example.controller;
 
-import org.example.DTO.*;
 import org.example.integration.courseLayoutDAO;
 import org.example.integration.courseLayoutDBException;
-import org.example.model.*;
 
+// Domain models
+import org.example.model.Allocation;
+import org.example.model.Cost;
+import org.example.model.CourseInstance;
+import org.example.model.PlannedActivity;
+import org.example.model.TeachingActivity;
+
+// Service layer
+import org.example.model.CourseLayoutService;
+
+/**
+ * Controller layer - handles user requests from the view.
+ * Delegates business logic to the service layer.
+ * Follows MVC architecture: View → Controller → Service → DAO
+ */
 public class Controller {
-    private CourseLayoutService courseLayoutService;
+    private final CourseLayoutService service;
 
+    /**
+     * Creates a new controller and initializes the service layer.
+     *
+     * @throws courseLayoutDBException if database connection fails
+     */
     public Controller() throws courseLayoutDBException {
-        this.courseLayoutService = new CourseLayoutService(new courseLayoutDAO());
+        courseLayoutDAO dao = new courseLayoutDAO();
+        this.service = new CourseLayoutService(dao);
     }
 
-    public CostImplementation getCourseCost(int instanceId, String studyYear) throws courseLayoutDBException {
-        PlannedActivityDTO planned = new PlannedActivityImpl(instanceId, studyYear);
-        TeachingActivityDTO teaching = new TeachingActivityImpl("Lecture"); // example
-        return courseLayoutService.calculateCostForCourse(planned, teaching);
+    /**
+     * Gets the planned and actual cost for a course.
+     *
+     * @param instanceId The course instance ID
+     * @param studyYear The study year
+     * @return Cost object with planned and actual costs
+     * @throws courseLayoutDBException if operation fails
+     */
+    public Cost getCourseCost(String instanceId, String studyYear) throws courseLayoutDBException {
+        PlannedActivity planned = new PlannedActivity(instanceId, studyYear);
+        TeachingActivity teaching = new TeachingActivity("Lecture"); // Default activity type
+        return service.calculateCostForCourse(planned, teaching);
     }
 
-    // Update students
-    public void updateStudentCount(String instanceId, String layoutId, int numStudents) throws courseLayoutDBException {
-        CourseInstanceDTO instance = new CourseInstanceImpl(instanceId, layoutId, numStudents);
-        courseLayoutService.updateStudentCount(instance);
+    /**
+     * Updates the student count for a course instance.
+     *
+     * @param instanceId The course instance ID
+     * @param layoutId The course layout ID
+     * @param numStudents The new number of students
+     * @throws courseLayoutDBException if operation fails
+     */
+    public void updateStudentCount(String instanceId, String layoutId, int numStudents) 
+            throws courseLayoutDBException {
+        CourseInstance instance = new CourseInstance(instanceId, layoutId, numStudents);
+        service.updateStudentCount(instance);
     }
 
-    // Allocate teacher
-    public void allocateTeacher(String empId, String courseInstanceId, String activityId) throws courseLayoutDBException {
-        AllocationDTO allocation = new AllocationImpl(empId, courseInstanceId, activityId);
-        courseLayoutService.allocateTeacher(allocation);
+    /**
+     * Allocates a teacher to a course activity.
+     *
+     * @param empId The employee (teacher) ID
+     * @param courseInstanceId The course instance ID
+     * @param activityId The activity ID
+     * @throws courseLayoutDBException if operation fails
+     */
+    public void allocateTeacher(String empId, String courseInstanceId, String activityId) 
+            throws courseLayoutDBException {
+        Allocation allocation = new Allocation(empId, courseInstanceId, activityId);
+        service.allocateTeacher(allocation);
     }
 
-    // Deallocating the teacher
-    public void deallocateTeacher(String empId, String courseInstanceId, String activityId) throws courseLayoutDBException {
-        AllocationDTO allocation = new AllocationImpl(empId, courseInstanceId, activityId);
-        courseLayoutService.deallocateTeacher(allocation);
+    /**
+     * Deallocates a teacher from a course activity.
+     *
+     * @param empId The employee (teacher) ID
+     * @param courseInstanceId The course instance ID
+     * @param activityId The activity ID
+     * @throws courseLayoutDBException if operation fails
+     */
+    public void deallocateTeacher(String empId, String courseInstanceId, String activityId) 
+            throws courseLayoutDBException {
+        Allocation allocation = new Allocation(empId, courseInstanceId, activityId);
+        service.deallocateTeacher(allocation);
     }
 
-    // Adding new activity
+    /**
+     * Creates a new teaching activity type.
+     *
+     * @param name The name of the activity (e.g., "Exercise", "Lab")
+     * @throws courseLayoutDBException if operation fails
+     */
     public void createTeachingActivity(String name) throws courseLayoutDBException {
-        TeachingActivityDTO activity = new TeachingActivityImpl(name);
-        courseLayoutService.createNewActivity(activity);
+        TeachingActivity activity = new TeachingActivity(name);
+        service.createNewActivity(activity);
     }
 }
