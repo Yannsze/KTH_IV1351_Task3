@@ -165,7 +165,7 @@ public class courseLayoutDAO {
         try {
             updateStudentCountsstmt.setInt(1, courseInstance.getCourseLayoutID());
             updateStudentCountsstmt.setInt(2, courseInstance.getNumStudents());
-            updateStudentCountsstmt.setString(3, courseInstance.getCourseInstanceID());
+            updateStudentCountsstmt.setInt(3, courseInstance.getCourseInstanceID());
             int numStudentsUpdate = updateStudentCountsstmt.executeUpdate();
 
             if (numStudentsUpdate != 1) {

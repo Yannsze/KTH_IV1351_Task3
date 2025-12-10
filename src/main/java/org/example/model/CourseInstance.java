@@ -5,7 +5,7 @@ package org.example.model;
  * This is a domain model that encapsulates course instance data.
  */
 public class CourseInstance {
-    private final String courseInstanceID;
+    private final int courseInstanceID;
     private final int courseLayoutID;
     private final int numStudents;
 
@@ -16,13 +16,13 @@ public class CourseInstance {
      * @param courseLayoutID The course layout ID (foreign key)
      * @param numStudents The number of students enrolled
      */
-    public CourseInstance(int courseLayoutID, int numStudents, String courseInstanceID) {
+    public CourseInstance(int courseLayoutID, int numStudents, int courseInstanceID) {
         this.courseInstanceID = courseInstanceID;
         this.courseLayoutID = courseLayoutID;
         this.numStudents = numStudents;
     }
 
-    public String getCourseInstanceID() {
+    public int getCourseInstanceID() {
         return courseInstanceID;
     }
 

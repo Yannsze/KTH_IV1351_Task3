@@ -77,7 +77,8 @@ public class CmdLine {
             int courseLayoutID = Integer.parseInt(courseLayoutIDstr);
             String numStudentsStr = readString("Enter increased number of student in total: ");
             int numStudents = Integer.parseInt(numStudentsStr);
-            String courseInstanceID = readString("Enter Course Instance ID: ");
+            String courseInstanceIDStr = readString("Enter Course Instance ID: ");
+            int courseInstanceID = Integer.parseInt(courseInstanceIDStr);
 
             controller.updateStudentCount(courseLayoutID, numStudents, courseInstanceID);
             System.out.println("Student is now " + numStudents);

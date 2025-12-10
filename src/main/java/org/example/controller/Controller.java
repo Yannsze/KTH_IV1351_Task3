@@ -48,7 +48,7 @@ public class Controller {
         return new CostDTO(cost.getPlannedCost(), cost.getActualCost());
     }
 
-    public void updateStudentCount(int courseLayoutID, int numStudents, String courseInstanceID)
+    public void updateStudentCount(int courseLayoutID, int numStudents, int courseInstanceID)
             throws courseLayoutDBException {
         CourseInstance instance = new CourseInstance(courseLayoutID, numStudents, courseInstanceID);
         service.updateStudentCount(instance);
