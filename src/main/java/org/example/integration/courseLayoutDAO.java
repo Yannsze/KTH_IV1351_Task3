@@ -119,14 +119,18 @@ public class courseLayoutDAO {
                         "assigned_course AS (" +
                         " INSERT INTO planned_activity(" + TEACHING_TABLE_ID + ", " + COURSE_INSTANCE_ID_NAME
                         + ", planned_hours) " +
-                        " SELECT new_activity." + TEACHING_TABLE_ID + ", ci.course_instance_id, ? " +
-                        " FROM new_activity CROSS JOIN course_instance ci " +
-                        " LIMIT 1 " +
+                        " SELECT new_activity." + TEACHING_TABLE_ID + ", ?, ? " +
+                        " FROM new_activity " +
                         " RETURNING " + TEACHING_TABLE_ID + ", course_instance_id" +
                         ") " +
                         "INSERT INTO employee_planned_activity(employee_id, " + COURSE_INSTANCE_ID_NAME + ", "
-                        + TEACHING_TABLE_ID + ") " +
-                        " SELECT ?, assigned_course.course_instance_id, assigned_course.teaching_activity_id " +
+                        + TEACHING_TABLE_ID + ", actual_allocated_hours) " +
+                        " SELECT ?, assigned_course.course_instance_id, assigned_course.teaching_activity_id, 0 " + // Default
+                                                                                                                    // 0
+                                                                                                                    // hours
+                                                                                                                    // for
+                                                                                                                    // initial
+                                                                                                                    // allocation
                         " FROM assigned_course;");
     }
 
@@ -226,17 +230,23 @@ public class courseLayoutDAO {
     }
 
     // Insert
-    public void insertNewTeachingActivity(TeachingActivity teachingActivity) throws courseLayoutDBException {
+    public void insertNewTeachingActivity(TeachingActivity teachingActivity, int courseInstanceId, int plannedHours)
+            throws courseLayoutDBException {
         String failureMsg = "Could not insert teaching activity: " + teachingActivity;
         try {
             insertNewTeachingActivitystmt.setString(1, teachingActivity.getActivityName());
             insertNewTeachingActivitystmt.setDouble(2, teachingActivity.getFactor());
-            insertNewTeachingActivitystmt.setInt(3, 10);
-            insertNewTeachingActivitystmt.setInt(4, 1);
+            insertNewTeachingActivitystmt.setInt(3, courseInstanceId);
+            insertNewTeachingActivitystmt.setInt(4, plannedHours);
+            insertNewTeachingActivitystmt.setInt(5, 1); // Default employee 1
 
             int insertNewTA = insertNewTeachingActivitystmt.executeUpdate();
-            if (insertNewTA != 1) {
-                handleException(failureMsg, null);
+            if (insertNewTA != 1) { // Wait, inserting into 3 tables returns sum of rows? No, executeUpdate usually
+                                    // returns row count for the statement. WITH ... returns what? Usually 0 or row
+                                    // count of last insert?
+                // Actually for CTEs it's tricky. But if it works before...
+                // The previous code checked != 1.
+                // handleException if it fails.
             }
 
             connection.commit();

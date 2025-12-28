@@ -5,7 +5,8 @@ import org.example.integration.courseLayoutDBException;
 
 /**
  * Service layer containing business logic for course layout operations.
- * This layer sits between the Controller and DAO, handling validation and orchestration.
+ * This layer sits between the Controller and DAO, handling validation and
+ * orchestration.
  */
 public class CourseLayoutService {
     private final courseLayoutDAO courseLayoutDAO;
@@ -17,7 +18,7 @@ public class CourseLayoutService {
     /**
      * Calculates both planned and actual costs for a course.
      *
-     * @param plannedActivity The planned activity details
+     * @param plannedActivity  The planned activity details
      * @param teachingActivity The teaching activity type
      * @return Cost object with planned and actual costs
      * @throws courseLayoutDBException if database operation fails
@@ -28,7 +29,7 @@ public class CourseLayoutService {
         if (plannedActivity == null || teachingActivity == null) {
             throw new IllegalArgumentException("Planned activity and teaching activity cannot be null");
         }
-        
+
         return courseLayoutDAO.plannedActualCosts(plannedActivity, teachingActivity);
     }
 
@@ -46,7 +47,7 @@ public class CourseLayoutService {
         if (instance.getNumStudents() < 0) {
             throw new IllegalArgumentException("Number of students cannot be negative");
         }
-        
+
         courseLayoutDAO.updateStudent(instance);
     }
 
@@ -70,7 +71,7 @@ public class CourseLayoutService {
         if (allocation.getTeachingActivityID() == 0) {
             throw new IllegalArgumentException("Activity ID cannot be empty");
         }
-        
+
         courseLayoutDAO.allocateTeacherActivity(allocation);
     }
 
@@ -85,7 +86,7 @@ public class CourseLayoutService {
         if (allocation == null) {
             throw new IllegalArgumentException("Allocation cannot be null");
         }
-        
+
         courseLayoutDAO.deallocatedTeacherActivity(allocation);
     }
 
@@ -95,7 +96,8 @@ public class CourseLayoutService {
      * @param activity The teaching activity to create
      * @throws courseLayoutDBException if database operation fails
      */
-    public void createNewActivity(TeachingActivity activity) throws courseLayoutDBException {
+    public void createNewActivity(TeachingActivity activity, int courseInstanceId, int plannedHours)
+            throws courseLayoutDBException {
         // Validation
         if (activity == null) {
             throw new IllegalArgumentException("Teaching activity cannot be null");
@@ -103,7 +105,10 @@ public class CourseLayoutService {
         if (activity.getActivityName() == null || activity.getActivityName().trim().isEmpty()) {
             throw new IllegalArgumentException("Activity name cannot be empty");
         }
-        
-        courseLayoutDAO.insertNewTeachingActivity(activity);
+        if (courseInstanceId <= 0) {
+            throw new IllegalArgumentException("Course Instance ID must be positive"); // Validation!
+        }
+
+        courseLayoutDAO.insertNewTeachingActivity(activity, courseInstanceId, plannedHours);
     }
 }

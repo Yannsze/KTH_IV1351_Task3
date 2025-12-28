@@ -87,8 +87,9 @@ public class Controller {
      *
      * @throws courseLayoutDBException if operation fails
      */
-    public void createTeachingActivity(String name, double factor) throws courseLayoutDBException {
-        TeachingActivity activity = new TeachingActivity("Exercise", 1.0);
-        service.createNewActivity(activity);
+    public void createTeachingActivity(String name, double factor, int courseInstanceId, int plannedHours)
+            throws courseLayoutDBException {
+        TeachingActivity activity = new TeachingActivity(name, factor);
+        service.createNewActivity(activity, courseInstanceId, plannedHours);
     }
 }

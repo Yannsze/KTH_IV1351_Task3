@@ -127,13 +127,21 @@ public class CmdLine {
 
     private void handleAddActivity() throws courseLayoutDBException {
         try {
-            String name = "Exercise"; // fixed name for this assignment
-            controller.createTeachingActivity(name, 1.0);
-            System.out.println("New activity added successfully.");
-        } catch (courseLayoutDBException e) {
-            System.out.print("The Activity has already added!");
-        }
+            String name = readString("Enter Activity Name (e.g. Admin, Exam): ");
+            String factorStr = readString("Enter Factor: ");
+            double factor = Double.parseDouble(factorStr);
+            String courseInstanceIdStr = readString("Enter Course Instance ID: ");
+            int courseInstanceId = Integer.parseInt(courseInstanceIdStr);
+            String plannedHoursStr = readString("Enter Planned Hours: ");
+            int plannedHours = Integer.parseInt(plannedHoursStr);
 
+            controller.createTeachingActivity(name, factor, courseInstanceId, plannedHours);
+            System.out.println("New activity added successfully.");
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input! Please enter a numeric value.");
+        } catch (courseLayoutDBException e) {
+            System.out.println("Error adding activity: " + e.getMessage());
+        }
     }
 
     // Helper methods to read input
