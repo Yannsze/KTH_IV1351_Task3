@@ -101,6 +101,11 @@ public class CmdLine {
             System.out.println("Teacher allocated successfully.");
         } catch (NumberFormatException e) {
             System.out.println("Invalid input! Please enter an integer value.");
+        } catch (courseLayoutDBException e) {
+            System.out.println("Operation failed: " + e.getMessage());
+            if (e.getCause() != null) {
+                System.out.println("Reason: " + e.getCause().getMessage());
+            }
         }
     }
 
