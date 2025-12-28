@@ -3,7 +3,7 @@ package org.example.view;
 import org.example.DTO.CostDTO;
 import org.example.controller.Controller;
 import org.example.integration.courseLayoutDBException;
-import org.example.model.Cost;
+import java.sql.SQLException;
 import java.util.Scanner;
 
 public class CmdLine {
@@ -102,10 +102,15 @@ public class CmdLine {
         } catch (NumberFormatException e) {
             System.out.println("Invalid input! Please enter an integer value.");
         } catch (courseLayoutDBException e) {
-            System.out.println("Operation failed: " + e.getMessage());
-            if (e.getCause() != null) {
-                System.out.println("Reason: " + e.getCause().getMessage());
+            String msg = "Operation failed: The teacher could not be allocated.";
+            Throwable cause = e.getCause();
+            if (cause instanceof SQLException) {
+                SQLException sqlErr = (SQLException) cause;
+                if ("72000".equals(sqlErr.getSQLState())) {
+                    msg = "Operation denied: The teacher has reached the maximum number of allocated courses (4).";
+                }
             }
+            System.out.println(msg);
         }
     }
 
@@ -140,7 +145,7 @@ public class CmdLine {
         } catch (NumberFormatException e) {
             System.out.println("Invalid input! Please enter a numeric value.");
         } catch (courseLayoutDBException e) {
-            System.out.println("Error adding activity: " + e.getMessage());
+            System.out.println("Operation failed: The activity could not be added.");
         }
     }
 
