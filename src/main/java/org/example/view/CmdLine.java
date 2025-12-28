@@ -63,10 +63,9 @@ public class CmdLine {
             String studyYearStr = readString("Enter Study Year: ");
             int studyYear = Integer.parseInt(studyYearStr);
 
-
             CostDTO cost = controller.getCourseCost(instanceId, studyYear);
             System.out.println("Planned Cost: " + cost.getPlannedCost() + " | Actual Cost: " + cost.getActualCost());
-        } catch (NumberFormatException e){
+        } catch (NumberFormatException e) {
             System.out.println("Invalid input! Please enter an integer value.");
         }
     }
@@ -95,8 +94,10 @@ public class CmdLine {
             int courseInstanceId = Integer.parseInt(courseInstanceIdStr);
             String teachingActivityIdStr = readString("Enter Teaching Activity ID: ");
             int teachingActivityId = Integer.parseInt(teachingActivityIdStr);
+            String allocatedHoursStr = readString("Enter Allocated Hours: ");
+            double allocatedHours = Double.parseDouble(allocatedHoursStr);
 
-            controller.allocateTeacher(empId, courseInstanceId, teachingActivityId);
+            controller.allocateTeacher(empId, courseInstanceId, teachingActivityId, allocatedHours);
             System.out.println("Teacher allocated successfully.");
         } catch (NumberFormatException e) {
             System.out.println("Invalid input! Please enter an integer value.");

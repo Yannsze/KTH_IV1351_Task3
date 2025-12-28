@@ -57,28 +57,28 @@ public class Controller {
     /**
      * Allocates a teacher to a course activity.
      *
-     * @param empId The employee (teacher) ID
+     * @param empId            The employee (teacher) ID
      * @param courseInstanceId The course instance ID
-     * @param activityId The activity ID
+     * @param activityId       The activity ID
      * @throws courseLayoutDBException if operation fails
      */
-    public void allocateTeacher(int empId, int courseInstanceId, int activityId)
+    public void allocateTeacher(int empId, int courseInstanceId, int activityId, double allocatedHours)
             throws courseLayoutDBException {
-        Allocation allocation = new Allocation(empId, courseInstanceId, activityId);
+        Allocation allocation = new Allocation(empId, courseInstanceId, activityId, allocatedHours);
         service.allocateTeacher(allocation);
     }
 
     /**
      * Deallocates a teacher from a course activity.
      *
-     * @param empId The employee (teacher) ID
-     * @param courseInstanceId The course instance ID
+     * @param empId              The employee (teacher) ID
+     * @param courseInstanceId   The course instance ID
      * @param teachingActivityId The activity ID
      * @throws courseLayoutDBException if operation fails
      */
     public void deallocateTeacher(int empId, int courseInstanceId, int teachingActivityId)
             throws courseLayoutDBException {
-        Allocation allocation = new Allocation(empId, courseInstanceId, teachingActivityId);
+        Allocation allocation = new Allocation(empId, courseInstanceId, teachingActivityId, 0.0);
         service.deallocateTeacher(allocation);
     }
 

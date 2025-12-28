@@ -38,7 +38,8 @@ public class courseLayoutDAO {
         }
     }
 
-    // The procedure of connecting to the database (Postgres, in Yannsze's localhost)
+    // The procedure of connecting to the database (Postgres, in Yannsze's
+    // localhost)
     private void connectToCourseLayoutDB() throws ClassNotFoundException, SQLException {
         String url = "jdbc:postgresql://localhost:5432/courselayout"; // modify localhost & password
         String user = "postgres";
@@ -57,77 +58,81 @@ public class courseLayoutDAO {
                         "    SELECT AVG(sh.salary_amount) AS avg_sal" +
                         "    FROM " + SALARY_HISTORY_TABLE + " sh" +
                         ")" +
-                        " SELECT ROUND(CAST(SUM(avg_salary.avg_sal / (pa.planned_hours * ta.factor)) AS NUMERIC), 2)AS planned_cost" +
+                        " SELECT ROUND(CAST(SUM(avg_salary.avg_sal / (pa.planned_hours * ta.factor)) AS NUMERIC), 2)AS planned_cost"
+                        +
                         " FROM " + EMPLOYEE_CROSS_REFERENCE_TABLE_NAME + " epa" +
-                        " JOIN planned_activity pa ON epa.course_instance_id = CAST(pa.course_instance_id AS INTEGER) " +
+                        " JOIN planned_activity pa ON epa.course_instance_id = CAST(pa.course_instance_id AS INTEGER) "
+                        +
                         " JOIN " + TEACHING_TABLE_NAME + " ta ON epa.teaching_activity_id = ta.teaching_activity_id" +
-                        " JOIN " + COURSE_INSTANCE_TABLE_NAME + " ci ON epa.course_instance_id = ci.course_instance_id" +
+                        " JOIN " + COURSE_INSTANCE_TABLE_NAME + " ci ON epa.course_instance_id = ci.course_instance_id"
+                        +
                         " CROSS JOIN " + AVG_SALARY +
                         " WHERE ci.course_instance_id = ?" +
-                        " AND ci.study_year = ?;"
-        );
+                        " AND ci.study_year = ?;");
 
         actualTeachingCoststmt = connection.prepareStatement(
                 "WITH " + AVG_SALARY + " AS (" +
                         "    SELECT AVG(sh.salary_amount) AS avg_sal" +
                         "    FROM " + SALARY_HISTORY_TABLE + " sh" +
                         ")" +
-                        " SELECT ROUND(CAST(SUM(avg_salary.avg_sal / (epa.actual_allocated_hours * ta.factor)) AS NUMERIC), 2)AS actual_cost" +
+                        " SELECT ROUND(CAST(SUM(avg_salary.avg_sal / (epa.actual_allocated_hours * ta.factor)) AS NUMERIC), 2)AS actual_cost"
+                        +
                         " FROM " + EMPLOYEE_CROSS_REFERENCE_TABLE_NAME + " epa" +
-                        " JOIN planned_activity pa ON epa.course_instance_id = CAST(pa.course_instance_id AS INTEGER) " +
+                        " JOIN planned_activity pa ON epa.course_instance_id = CAST(pa.course_instance_id AS INTEGER) "
+                        +
                         " JOIN " + TEACHING_TABLE_NAME + " ta ON epa.teaching_activity_id = ta.teaching_activity_id" +
-                        " JOIN " + COURSE_INSTANCE_TABLE_NAME + " ci ON epa.course_instance_id = ci.course_instance_id" +
+                        " JOIN " + COURSE_INSTANCE_TABLE_NAME + " ci ON epa.course_instance_id = ci.course_instance_id"
+                        +
                         " CROSS JOIN " + AVG_SALARY +
                         " WHERE ci.course_instance_id = ?" +
-                        " AND ci.study_year = ?;"
-        );
+                        " AND ci.study_year = ?;");
 
         updateStudentCountsstmt = connection.prepareStatement(
                 // int, int, varchar (string)
                 "UPDATE " + COURSE_INSTANCE_TABLE_NAME + " SET " +
                         COURSE_LAYOUT_NAME + " = ?, " +
                         STUDENT_COLUMN_NAME + " = ? " +
-                        "WHERE " + COURSE_INSTANCE_ID_NAME + " = ?;"
-        );
+                        "WHERE " + COURSE_INSTANCE_ID_NAME + " = ?;");
 
         teacherAllocateActivitystmt = connection.prepareStatement(
                 // int, int, int
                 "INSERT INTO " + EMPLOYEE_CROSS_REFERENCE_TABLE_NAME + " (" +
                         EMPLOYEE_ID_NAME + ", " + COURSE_INSTANCE_ID_NAME + ", " +
-                        TEACHING_TABLE_ID + ") " +
-                        "VALUES (?, ?, ?);"
-        );
+                        TEACHING_TABLE_ID + ", actual_allocated_hours) " +
+                        "VALUES (?, ?, ?, ?);");
 
         teacherDeallocateActivitystmt = connection.prepareStatement(
                 // int, int, int
                 "DELETE FROM " + EMPLOYEE_CROSS_REFERENCE_TABLE_NAME +
                         " WHERE " + EMPLOYEE_ID_NAME + " = ? AND " +
                         COURSE_INSTANCE_ID_NAME + " = ? AND " +
-                        TEACHING_TABLE_ID + " = ?;"
-        );
+                        TEACHING_TABLE_ID + " = ?;");
 
         insertNewTeachingActivitystmt = connection.prepareStatement(
                 // string, double, int, int
-                //"INSERT INTO " + TEACHING_TABLE_NAME + " (activity_name, factor) VALUES (?, ?) RETURNING " +  TEACHING_TABLE_ID
+                // "INSERT INTO " + TEACHING_TABLE_NAME + " (activity_name, factor) VALUES (?,
+                // ?) RETURNING " + TEACHING_TABLE_ID
                 "WITH new_activity AS (" +
                         " INSERT INTO " + TEACHING_TABLE_NAME + " (activity_name, factor) " +
                         " VALUES (?, ?) " +
                         " RETURNING " + TEACHING_TABLE_ID + "), " +
                         "assigned_course AS (" +
-                        " INSERT INTO planned_activity(" + TEACHING_TABLE_ID +", " + COURSE_INSTANCE_ID_NAME + ", planned_hours) " +
+                        " INSERT INTO planned_activity(" + TEACHING_TABLE_ID + ", " + COURSE_INSTANCE_ID_NAME
+                        + ", planned_hours) " +
                         " SELECT new_activity." + TEACHING_TABLE_ID + ", ci.course_instance_id, ? " +
                         " FROM new_activity CROSS JOIN course_instance ci " +
                         " LIMIT 1 " +
                         " RETURNING " + TEACHING_TABLE_ID + ", course_instance_id" +
                         ") " +
-                        "INSERT INTO employee_planned_activity(employee_id, " + COURSE_INSTANCE_ID_NAME + ", "+ TEACHING_TABLE_ID +") " +
+                        "INSERT INTO employee_planned_activity(employee_id, " + COURSE_INSTANCE_ID_NAME + ", "
+                        + TEACHING_TABLE_ID + ") " +
                         " SELECT ?, assigned_course.course_instance_id, assigned_course.teaching_activity_id " +
-                        " FROM assigned_course;"
-        );
+                        " FROM assigned_course;");
     }
 
-    public Cost plannedActualCosts(PlannedActivity plannedActivity, TeachingActivity teachingActivity) throws courseLayoutDBException {
-        String failureMsg = "Could not get planned and actual cost: " + plannedActivity + ", " + teachingActivity ;
+    public Cost plannedActualCosts(PlannedActivity plannedActivity, TeachingActivity teachingActivity)
+            throws courseLayoutDBException {
+        String failureMsg = "Could not get planned and actual cost: " + plannedActivity + ", " + teachingActivity;
         try {
             plannedTeachingCoststmt.setInt(1, plannedActivity.getCourseInstanceId());
             plannedTeachingCoststmt.setInt(2, plannedActivity.getStudyYear());
@@ -186,6 +191,7 @@ public class courseLayoutDAO {
             teacherAllocateActivitystmt.setInt(1, allocation.getEmployeeID());
             teacherAllocateActivitystmt.setInt(2, allocation.getCourseInstanceID());
             teacherAllocateActivitystmt.setInt(3, allocation.getTeachingActivityID());
+            teacherAllocateActivitystmt.setDouble(4, allocation.getAllocatedHours());
             int teacherActivityUpdate = teacherAllocateActivitystmt.executeUpdate();
 
             if (teacherActivityUpdate != 1) {
@@ -215,7 +221,7 @@ public class courseLayoutDAO {
             connection.commit();
 
         } catch (SQLException e) {
-            handleException(failureMsg, e);   // if >4 courses → trigger throws here
+            handleException(failureMsg, e); // if >4 courses → trigger throws here
         }
     }
 
@@ -234,8 +240,7 @@ public class courseLayoutDAO {
             }
 
             connection.commit();
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             handleException(failureMsg, e);
         }
     }
