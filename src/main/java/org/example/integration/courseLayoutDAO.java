@@ -58,7 +58,7 @@ public class courseLayoutDAO {
                         "    SELECT AVG(sh.salary_amount) AS avg_sal" +
                         "    FROM " + SALARY_HISTORY_TABLE + " sh" +
                         ")" +
-                        " SELECT ROUND(CAST(SUM(avg_salary.avg_sal / (pa.planned_hours * ta.factor)) AS NUMERIC), 2)AS planned_cost"
+                        " SELECT ROUND(CAST(SUM(avg_salary.avg_sal / NULLIF(pa.planned_hours * ta.factor, 0.0)) AS NUMERIC), 2)AS planned_cost"
                         +
                         " FROM " + EMPLOYEE_CROSS_REFERENCE_TABLE_NAME + " epa" +
                         " JOIN planned_activity pa ON epa.course_instance_id = CAST(pa.course_instance_id AS INTEGER) "
@@ -75,7 +75,7 @@ public class courseLayoutDAO {
                         "    SELECT AVG(sh.salary_amount) AS avg_sal" +
                         "    FROM " + SALARY_HISTORY_TABLE + " sh" +
                         ")" +
-                        " SELECT ROUND(CAST(SUM(avg_salary.avg_sal / (epa.actual_allocated_hours * ta.factor)) AS NUMERIC), 2)AS actual_cost"
+                        " SELECT ROUND(CAST(SUM(avg_salary.avg_sal / NULLIF(epa.actual_allocated_hours * ta.factor, 0.0)) AS NUMERIC), 2)AS actual_cost"
                         +
                         " FROM " + EMPLOYEE_CROSS_REFERENCE_TABLE_NAME + " epa" +
                         " JOIN planned_activity pa ON epa.course_instance_id = CAST(pa.course_instance_id AS INTEGER) "
@@ -234,20 +234,54 @@ public class courseLayoutDAO {
             throws courseLayoutDBException {
         String failureMsg = "Could not insert teaching activity: " + teachingActivity;
         try {
-            insertNewTeachingActivitystmt.setString(1, teachingActivity.getActivityName());
-            insertNewTeachingActivitystmt.setDouble(2, teachingActivity.getFactor());
-            insertNewTeachingActivitystmt.setInt(3, courseInstanceId);
-            insertNewTeachingActivitystmt.setInt(4, plannedHours);
-            insertNewTeachingActivitystmt.setInt(5, 1); // Default employee 1
-
-            int insertNewTA = insertNewTeachingActivitystmt.executeUpdate();
-            if (insertNewTA != 1) { // Wait, inserting into 3 tables returns sum of rows? No, executeUpdate usually
-                                    // returns row count for the statement. WITH ... returns what? Usually 0 or row
-                                    // count of last insert?
-                // Actually for CTEs it's tricky. But if it works before...
-                // The previous code checked != 1.
-                // handleException if it fails.
+            // 1. Check if activity exists
+            int activityId = -1;
+            PreparedStatement checkStmt = connection.prepareStatement(
+                    "SELECT " + TEACHING_TABLE_ID + " FROM " + TEACHING_TABLE_NAME + " WHERE activity_name = ?");
+            checkStmt.setString(1, teachingActivity.getActivityName());
+            ResultSet rs = checkStmt.executeQuery();
+            if (rs.next()) {
+                activityId = rs.getInt(TEACHING_TABLE_ID);
             }
+            rs.close();
+
+            // 2. If not exists, insert it
+            if (activityId == -1) {
+                // We use a simple insert here instead of the complex CTE since we broke it down
+                PreparedStatement insertActivityStmt = connection.prepareStatement(
+                        "INSERT INTO " + TEACHING_TABLE_NAME + " (activity_name, factor) VALUES (?, ?) RETURNING "
+                                + TEACHING_TABLE_ID);
+                insertActivityStmt.setString(1, teachingActivity.getActivityName());
+                insertActivityStmt.setDouble(2, teachingActivity.getFactor());
+                ResultSet rsInsert = insertActivityStmt.executeQuery();
+                if (rsInsert.next()) {
+                    activityId = rsInsert.getInt(TEACHING_TABLE_ID);
+                }
+                rsInsert.close();
+            }
+
+            if (activityId == -1) {
+                throw new SQLException("Failed to obtain activity ID.");
+            }
+
+            // 3. Insert into planned_activity for this course
+            PreparedStatement planStmt = connection.prepareStatement(
+                    "INSERT INTO planned_activity (" + TEACHING_TABLE_ID + ", " + COURSE_INSTANCE_ID_NAME
+                            + ", planned_hours) VALUES (?, ?, ?)");
+            planStmt.setInt(1, activityId);
+            planStmt.setInt(2, courseInstanceId);
+            planStmt.setInt(3, plannedHours);
+            planStmt.executeUpdate();
+
+            // 4. Allocate to default employee (ID 1)
+            PreparedStatement allocStmt = connection.prepareStatement(
+                    "INSERT INTO employee_planned_activity (employee_id, " + COURSE_INSTANCE_ID_NAME + ", "
+                            + TEACHING_TABLE_ID + ", actual_allocated_hours) VALUES (?, ?, ?, ?)");
+            allocStmt.setInt(1, 1); // Default Employee 1
+            allocStmt.setInt(2, courseInstanceId);
+            allocStmt.setInt(3, activityId);
+            allocStmt.setDouble(4, 0); // Default 0 hours
+            allocStmt.executeUpdate();
 
             connection.commit();
         } catch (SQLException e) {

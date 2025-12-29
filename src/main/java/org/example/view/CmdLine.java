@@ -67,6 +67,13 @@ public class CmdLine {
             System.out.println("Planned Cost: " + cost.getPlannedCost() + " | Actual Cost: " + cost.getActualCost());
         } catch (NumberFormatException e) {
             System.out.println("Invalid input! Please enter an integer value.");
+        } catch (courseLayoutDBException e) {
+            System.out.println("Operation failed: Could not get the cost.");
+            // Keep debug print temporarily to diagnose the persistence of the error
+            System.out.println("DEBUG: " + e.getMessage());
+            if (e.getCause() != null) {
+                System.out.println("DEBUG Cause: " + e.getCause().getMessage());
+            }
         }
     }
 
